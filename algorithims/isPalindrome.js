@@ -44,34 +44,34 @@
 // third elem is digits[2]
 // it is not a palindrome
 
-function isPalindrome(n) {
-  if (n < 0) {
-    return false;
-  }
+// function isPalindrome(n) {
+//   if (n < 0) {
+//     return false;
+//   }
 
-  digits = [-1, 2, 1]; //convert_number_to_array(n); // 123 -> [1, 2, 3]
-  let i = 0;
-  let j = digits.length - 1;
+//   digits = [-1, 2, 1]; //convert_number_to_array(n); // 123 -> [1, 2, 3]
+//   let i = 0;
+//   let j = digits.length - 1;
 
-  while (i < j) {
-    if (digits[i] !== digits[j]) {
-      return false;
-    }
-    i++;
-    j--;
-  }
-  return true;
+//   while (i < j) {
+//     if (digits[i] !== digits[j]) {
+//       return false;
+//     }
+//     i++;
+//     j--;
+//   }
+//   return true;
 
-  /*let ok = true;
-    while (i < j) {
-        ok = ok && digits[i] == digits[j]; // false && x -> false
-        i++;
-        j--;
-    }
-    return ok;*/
-}
+//   /*let ok = true;
+//     while (i < j) {
+//         ok = ok && digits[i] == digits[j]; // false && x -> false
+//         i++;
+//         j--;
+//     }
+//     return ok;*/
+// }
 
-console.log(isPalindrome(1218));
+// console.log(isPalindrome(1218));
 
 // create a function that returns true or false if an input is a palindrome
 // example 1: input: 121 TRUE
@@ -82,26 +82,43 @@ console.log(isPalindrome(1218));
 
 // compare the first element w/ the last elem and so on (2nd, 3rd until meets)
 // compare the last element with the first elem, so on
-// 12344321 true palindrome 
+// 12344321 true palindrome
 
+// function isPalindrome(int) {
+//   const digits = [1, 2, 3, 4, 4, 3, 2, 1];
 
-function isPalindrome(int) {
-  const digits = [1, 2, 3, 4, 4, 3, 2, 1];
-                                      
+//   let i = 0;
+//   let j = digits.length - 1 // 7
+
+//   // how to meet in the middle when index i crosses index j
+//   while (i < j) {
+//     if (int < 0) {
+//       return false
+//       // negatives are always bool false
+//     }
+//     if (digits[i] != digits[j]) {
+//       return false;
+//     }
+//     j--
+//     i++
+//   }
+//   return true;
+// }
+
+const input = 123219;
+
+function isPalindrome(input) {
+  input_string = input.toString();
   let i = 0;
-  let j = digits.length - 1 // 7 
-
-  // how to meet in the middle when index i crosses index j
+  let j = input_string.length - 1;
   while (i < j) {
-    if (int < 0) {
-      return false
-      // negatives are always bool false
-    }
-    if (digits[i] != digits[j]) {
+    if (input_string[i] != input_string[j]) {
       return false;
     }
-    j--
-    i++
+    i++;
+    j--;
   }
   return true;
 }
+
+console.log(isPalindrome(input));
