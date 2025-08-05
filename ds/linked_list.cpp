@@ -189,7 +189,58 @@ class LinkedList {
 
     // reverse
     void reverse() {
+        // 1 2 3 4
+        // 4 3 2 1
+        if (m_head == nullptr || m_count <= 1) {
+            return;
+        }
 
+        m_tail = m_head;
+
+        // repeat until next is nullptr
+        // curr's next to point to prev
+        // prev to become curr
+        // next's next to point to curr
+        // curr walk
+        // next walk
+
+        Node* prev = nullptr;
+        Node* curr = m_head;
+        Node* next = curr->next;
+        while (next != nullptr) {
+            curr->next = prev;
+            prev = curr;
+            Node* temp = next->next;
+            next->next = curr;
+            curr = next;
+            next = temp;
+        }
+
+        // when next is nullptr
+        // curr->next to become previous and set to head
+        curr->next = prev;
+        m_head = curr;
+    }
+
+    private:
+    // base: 1 2 3 null
+    void _reverseRec(Node* curr, Node* next) {
+        if (next == nullptr) {
+            m_head = curr;
+            return;
+        }
+        _reverseRec(next, next->next);
+        next->next = curr;
+    }
+
+    public:
+    void reverseRec() {
+        if (m_head == nullptr || m_count <= 1) {
+            return;
+        }
+        m_tail = m_head;
+        _reverseRec(m_head, m_head->next);
+        m_tail->next = nullptr;
     }
 
     // traverse
