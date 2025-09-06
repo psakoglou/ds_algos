@@ -3,7 +3,17 @@
 #include <cstdlib> 
 #include <ctime>
 
-int partition(std::vector<int>& v, int p, int r) {
+// great for linear time selection in an unsorted array
+
+int random_index_in_range(int p, int r) {
+    std::srand(std::time(nullptr));
+    int range = r - p + 1;
+    return p + (std::rand() % range);
+}
+
+int randomized_partition(std::vector<int>& v, int p, int r) {
+    int ri = random_index_in_range(p, r);
+    std::swap(v[ri], v[r]);
     int x = v[r];
     int i = p - 1;
     for (int j = p; j < r; j++) {
@@ -14,14 +24,6 @@ int partition(std::vector<int>& v, int p, int r) {
     }
     std::swap(v[i+1], v[r]);
     return i+1;
-}
-
-int randomized_partition(std::vector<int>& v, int p, int r) {
-    int range = r - p + 1;
-    std::srand(std::time(nullptr));
-    int i = p + (std::rand() % range);
-    std::swap(v[i], v[r]);
-    return partition(v, p, r);
 }
 
 int randomized_select(std::vector<int>& v, int p, int r, int k) {
