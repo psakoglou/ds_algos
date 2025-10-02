@@ -1,0 +1,169 @@
+
+Stage 1 — Core KV store (integer keys & values)
+
+Goal: Build an in-memory key–value database for integers.
+
+Operations to implement
+
+set(key, value, now) — Insert or overwrite key with value. 
+
+get(key, now) → optional<int> — Return current value for key, or empty if missing.
+
+del(key, now) → bool — Delete key if present; return true if something was deleted.
+
+exists(key, now) → bool — Whether key currently exists.
+
+size(now) → int — Count of existing keys.
+
+clear() — Remove everything.
+
+Rules & constraints
+
+Keys and values are int.
+
+now is provided but not used yet.
+
+Overwrite semantics: latest set wins.
+
+Target average time for get/set/del/exists: O(1) (hash map acceptable).
+
+Edge cases
+
+get/del on a missing key.
+
+Overwriting an existing key.
+
+size after sequences of sets/deletes.
+
+===================================================
+
+Stage 2 — TTL (Time-to-Live)
+
+Goal: Add per-write expiration. A value is live only while now < expireAt.
+
+New/updated operations
+
+setWithTTL(key, value, now, ttlSeconds) — Store value; if ttlSeconds > 0, set expireAt = now + ttlSeconds, else no TTL.
+
+ttl(key, now) → optional<long long> — Remaining lifetime in seconds if live; empty if key missing or expired; (you may return empty for “no TTL” as well—define & stick to it).
+
+expire(key, now, ttlSeconds) → bool — Set/replace TTL on an existing live key. Return false if missing/expired.
+
+expireAt(key, absExpireAt) → bool — Absolute expiry time variant.
+
+persist(key, now) → bool — Remove TTL; key becomes non-expiring.
+
+touch(key, now, extendBySeconds) → bool — Extend TTL for hot keys.
+
+purgeExpired(now) → int — Proactively evict any entries that have expired by now; return number evicted.
+
+Updated behaviors
+
+All read/modify operations must treat keys with expireAt <= now as expired. You may implement lazy expiration (check on access) and/or proactive purge.
+
+Rules & constraints
+
+Time (now) is a monotonic integer provided by tests; do not read wall clock.
+
+Choose either lazy only, or lazy + a min-heap for purgeExpired. Both are acceptable.
+
+Edge cases
+
+ttlSeconds == 0 (immediate expiry).
+
+Overwrite an existing key with a new TTL (previous value becomes superseded).
+
+Query exactly at the boundary (expireAt == now should be considered expired).
+
+
+===================================================
+
+Stage 3 — Point-in-time reads (“time travel”)
+
+Goal: Support historical reads as of a timestamp, honoring overwrites, deletes, and TTLs.
+
+New operations
+
+getAt(key, t) → optional<int> — Value that was effective for key at time t. Return empty if none (missing, deleted, or expired by t).
+
+existsAt(key, t) → bool — Whether key existed at t.
+
+sizeAt(t) → int — Count of keys live at t (O(n) acceptable).
+
+keysAt(t) → vector<int> — Keys live at t (O(n) acceptable).
+
+history(key, from, to, limit) → vector<pair<Time,int>> — (Optional) Versions for debugging/tests.
+
+Updated behaviors
+
+set/setWithTTL must record versions with (ts=now, value, expireAt) for later binary search.
+
+del(key, now) must leave a tombstone at now so getAt(key, t >= now) returns empty while t < now still sees the prior non-expired value.
+
+Rules & constraints
+
+For each key, version history must be time-ordered to enable O(log m) lookups by t.
+
+A version is valid at t iff version.ts <= t < version.expireAt and not tombstoned by/at t.
+
+Edge cases
+
+Set → delete → set again; verify getAt across intervals.
+
+Expiry vs delete ordering (e.g., set with TTL, then delete before expiry; or delete after expiry).
+
+Multiple writes at the same now (tests rarely do this; define a stable tie-break if they do).
+
+
+===================================================
+
+Stage 4 — Deletion semantics & bulk/range ops
+
+Goal: Round out deletion behavior and add some convenience operations often seen in follow-ups.
+
+New operations
+
+delAt(key, now) → bool — Explicit timestamped delete (alias of del with now).
+
+deleteRange(loKey, hiKey, now) → int — Delete all keys with loKey <= key <= hiKey; return count. (If you didn’t choose an ordered structure, a full scan is acceptable for OA sizes.)
+
+deleteWhereLessEqual(threshold, now) / deleteWhereGreaterEqual(threshold, now) → int — Predicate deletes.
+
+CountEqual(value, now) → int — (Optional) Count how many live keys map to value (requires an auxiliary multimap or scan).
+
+compact(key, upToTime) / compactAll(upToTime, budget) → int — (Optional) History GC that prunes superseded versions up to a time/budget.
+
+Updated behaviors
+
+Deleting a missing/expired key returns false and should not add spurious history.
+
+Range deletes must honor TTL and produce tombstones for keys that were live at now.
+
+Edge cases
+
+Range appears empty (no-ops).
+
+Range intersects expired vs live keys.
+
+Re-insertion after a delete (history continuity).
+
+
+===================================================
+
+Stage 5 — Convenience features (often sprinkled as “bonus”)
+
+Goal: Add small features that exercise your API surface and invariants.
+
+Possible operations
+
+incrBy(key, delta, now, ttlSeconds?) → optional<int> — Atomically add delta to the current value (treat missing as 0 or return empty—define and be consistent). If a TTL is supplied, apply to the new write.
+
+snapshot(t) → Snapshot — Lightweight marker object capturing a time t.
+
+dumpAt(t) → vector<pair<Key,Value>> — Materialize the DB view at t (for tests).
+
+Notes
+
+incrBy must respect TTL and history rules.
+
+Snapshots are usually just wrappers around a timestamp since time is caller-supplied.
