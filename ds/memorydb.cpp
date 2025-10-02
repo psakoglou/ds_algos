@@ -1,17 +1,19 @@
 #include <set>
 #include <vector>
-#include <optional>
 #include <iostream>
+#include <optional>
 
-class MemoryDB {
+class MemoryDB
+{
 
     std::multiset<int> data;
     std::multiset<int>::iterator median;
 
-    public:
-
-    int Add(int value) {
-        if (data.empty()) {
+public:
+    int Add(int value)
+    {
+        if (data.empty())
+        {
             data.insert(value);
             median = data.begin();
             return 1;
@@ -19,30 +21,35 @@ class MemoryDB {
 
         data.insert(value);
         std::size_t n = data.size();
-        if (n % 2 == 0) {
-            if (value < *median) {
+        if (n % 2 == 0)
+        {
+            if (value < *median)
+            {
                 median--;
             }
-            //   m 
-            // 2 3 3 
-            //   m 
+            //   m
+            // 2 3 3
+            //   m
             // 2 3 3 4  // don't increase
 
-            //   m 
-            // 2 3 3 
-            //   m 
+            //   m
+            // 2 3 3
+            //   m
             // 1 2 3 3 // decrease
-        } else {  
-            //   m 
-            // 1 2 3 3 
+        }
+        else
+        {
+            //   m
+            // 1 2 3 3
             //     m
             // 1 1 2 3 3  // don't increase
 
-            //   m 
-            // 1 2 3 3 
+            //   m
+            // 1 2 3 3
             //     m
             // 1 2 3 3 4  // increase
-            if (value >= *median) {
+            if (value >= *median)
+            {
                 median++;
             }
         }
@@ -50,35 +57,49 @@ class MemoryDB {
         return data.size();
     }
 
-    bool Delete(int value) {
+    bool Delete(int value)
+    {
         auto found = data.find(value);
-        if (found == data.end()) {
+        if (found == data.end())
+        {
             return false;
         }
 
         std::size_t n = data.size();
 
-        if (n % 2 == 0) { // even to odd
-            if (median == found) {
+        if (n % 2 == 0)
+        { // even to odd
+            if (median == found)
+            {
                 median == data.erase(found);
-            } else if (value < *median) {
+            }
+            else if (value < *median)
+            {
                 median++;
                 data.erase(found);
-            } else {
+            }
+            else
+            {
                 data.erase(found);
             }
-        } else {
-            if (value >= *median) {
+        }
+        else
+        {
+            if (value >= *median)
+            {
                 median--;
                 data.erase(found);
-            } else {
+            }
+            else
+            {
                 data.erase(found);
             }
         }
         return true;
     }
 
-    int GetMedian() {
+    int GetMedian()
+    {
         return data.empty() ? *median : -1;
     }
 
@@ -99,10 +120,10 @@ class MemoryDB {
     int GetApproxPercentile(double p);
 
     double GetAverageInRange(int low, int high);
-
 };
 
-int main() {
+int main()
+{
     MemoryDB db;
 
     // Case 1: Add increasing numbers
@@ -129,7 +150,7 @@ int main() {
     db.Add(10);
     db.Add(20);
     db.Add(-5);
-    std::cout << "Median of {-5,1,3,3,3,10,20} = " 
+    std::cout << "Median of {-5,1,3,3,3,10,20} = "
               << db.GetMedian() << " (expected 3)\n";
 
     // Case 6: Delete down to empty
