@@ -74,6 +74,8 @@
         "xstddef": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "__tree": "cpp",
+        "unordered_set": "cpp"
     }
 }
