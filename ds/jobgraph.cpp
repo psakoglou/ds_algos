@@ -134,40 +134,34 @@ void insertToJobGraph(const LineInfo &li, unordered_map<char, vector<Node>> &job
     jobgraph[j1].push_back(n);
 }
 
-void dfs(char curr, unordered_map<char, vector<Node>> &jobgraph, map<int, vector<std::string>, std::greater<int>> &ans, unordered_set<char> &visited, int currSum, string &currPath)
+void dfs(char curr, unordered_map<char, vector<Node>> &jobgraph, map<int, vector<std::string>, std::greater<int>> &ans, int currSum, vector<char> &currPath)
 {
-    if (visited.count(curr))
-    {
-        cerr << "Back Edge\n";
-        return;
-    }
+    currPath.push_back(curr);
 
-    visited.insert(curr);
+    if (jobgraph[curr].empty()) {
+        string path;
+        int n = currPath.size();
+        for (int i = 0; i < n; i++) {
+            if (currPath[i] == '-') {
+                break;
+            }
+            path += string(1, currPath[i]);
+            if ((i+1) < n && currPath[i+1] != '-') {
+                path += " -> ";
+            }
 
-    currPath = currPath.empty() ? string(1, curr) : currPath + " -> " + string(1, curr);
-
-    if (jobgraph[curr].empty() || (jobgraph[curr].size() == 1 && !isValidJob(jobgraph[curr][0].job)))
-    {
-        if (ans.count(currSum))
-        {
-            ans[currSum].push_back(currPath);
         }
-        else
-        {
-            ans[currSum] = {currPath};
+        if (ans.count(currSum)) {
+            ans[currSum].push_back(path);
+        } else {
+            ans[currSum] = {path};
         }
-        visited.erase(curr);
-        return;
-    }
-
-    for (auto const &n : jobgraph[curr])
-    {
-        if (isValidJob(n.job))
-        {
-            dfs(n.job, jobgraph, ans, visited, currSum + n.runtime, currPath);
+    } else {
+        for (auto c : jobgraph[curr]) {
+            dfs(c.job, jobgraph, ans, currSum + c.runtime, currPath);
         }
     }
-    visited.erase(curr);
+    currPath.pop_back();
 }
 
 void printAnswer(const std::map<int, vector<std::string>, std::greater<int>> &ans)
@@ -201,10 +195,10 @@ void compute(const vector<string> &lines)
     // dfs
     // i want all dfs paths and their sum
     map<int, vector<std::string>, std::greater<int>> ans;
-    unordered_set<char> visited;
-    int currSum = 0;
-    string currPath = "";
-    dfs(jobgraph.begin()->first, jobgraph, ans, visited, currSum, currPath);
+    vector<char> currPath;
+    for (auto e : jobgraph) {
+        dfs(e.first, jobgraph, ans, 0, currPath);
+    }
 
     printAnswer(ans);
 }
